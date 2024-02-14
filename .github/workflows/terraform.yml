@@ -1,0 +1,61 @@
+name: 'Terraform'
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      enable_apis:
+        description: 'Choose an APIs'
+        required: true
+      project_name:
+        description: 'Select your project names'
+        required: false
+      folder_id:
+        description: 'Select a folder'
+        required: false
+      labels:
+        description: 'Choose your labels'
+        required: false
+      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+       contents: 'read'
+       id-token: 'write'
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+      # Install the latest version of Terraform CLI and configure the Terraform CLI
+      # configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: "Authenticate to Google Cloud"
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: "projects/672648503297/locations/global/workloadIdentityPools/github-wif-pool/providers/githubwif"
+          service_account: "plateform-admin@backstage-412018.iam.gserviceaccount.com"
+      # Fail pipeline if code is not formatted proper
+      - name: terraform fmt
+        id: fmt
+        run: terraform fmt
+      # Initialize a new or existing Terraform working directory by creating initial files
+      # loading any remote state, downloading modules, etc.
+      - name: terraform init
+        run: terraform init
+
+      - name: terraform check
+        run: ls
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: terraform validate
+        run: terraform validate
+      # Generates an execution plan for Terraform
+      - name: terraform plan
+        run: terraform plan
+      # On push to master, build or change infrastructure according to Terraform configuration files
+      - name: terraform apply
+        # if: ${{ github.ref == ‘refs/heads/master’ && github.event_name == ‘push’ }}
+        run: terraform apply -auto-approve -var-file=variable.tfvars
