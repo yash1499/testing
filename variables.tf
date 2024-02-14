@@ -29,6 +29,10 @@ variable "Role_viewer" {
   default     = "roles/viewer"
 }
 
+variable "members" {
+	  type= list(string)
+	  default = ["group:groupname@companyname.com","group:groupname2@companyname.com"]
+}
 
 
 variable "labels" {
