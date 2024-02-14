@@ -20,7 +20,8 @@ variable "Environment" {
 
 variable "Role" {
   description = "Choose a role"
-  default     = "roles/viewer"
+  type= list(string)
+  default     = ["roles/viewer"]
 }
 
 variable "Role_viewer" {
